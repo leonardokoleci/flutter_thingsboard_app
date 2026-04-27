@@ -93,6 +93,8 @@ dependencies:
   barcode: ^2.2.9
   riverpod_annotation: ^2.6.1
   path_provider: ^2.1.5
+  audioplayers: ^6.1.0
+  wakelock_plus: ^1.3.2
 dev_dependencies:
   integration_test:
     sdk: flutter

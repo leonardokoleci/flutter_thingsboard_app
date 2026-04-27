@@ -1,9 +1,9 @@
 import 'package:thingsboard_app/modules/main/model/navigation_type.dart';
 
 abstract final class ThingsboardAppConstants {
-  static const thingsBoardApiEndpoint = String.fromEnvironment(
-    'thingsboardApiEndpoint',
-  );
+  /// Hardcoded server host – change this to your Thingsboard instance.
+  static const thingsBoardApiEndpoint = 'https://demo.thingsboard.io';
+
   static const thingsboardOAuth2CallbackUrlScheme = String.fromEnvironment(
     'thingsboardOAuth2CallbackUrlScheme',
   );
@@ -13,9 +13,9 @@ abstract final class ThingsboardAppConstants {
   static const thingsboardAndroidAppSecret = String.fromEnvironment(
     'thingsboardAndroidAppSecret',
   );
-  static const ignoreRegionSelection = thingsBoardApiEndpoint != '';
-  static final navigationType = 
-  TbNavigationType.fromString(
-  const String.fromEnvironment('navigationType'),
+  // Always treat the hardcoded endpoint as the "default" so Firebase works.
+  static const ignoreRegionSelection = true;
+  static final navigationType = TbNavigationType.fromString(
+    const String.fromEnvironment('navigationType'),
   );
 }

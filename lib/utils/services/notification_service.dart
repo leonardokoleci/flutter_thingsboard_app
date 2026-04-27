@@ -2,15 +2,18 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:thingsboard_app/config/routes/router.dart';
 import 'package:thingsboard_app/config/routes/v2/router_2.dart';
 import 'package:thingsboard_app/config/themes/app_colors.dart';
 import 'package:thingsboard_app/core/logger/tb_logger.dart';
 import 'package:thingsboard_app/locator.dart';
+import 'package:thingsboard_app/modules/alarm/presentation/view/alarm_ringing_screen.dart';
 import 'package:thingsboard_app/modules/notification/service/i_notifications_local_service.dart';
 import 'package:thingsboard_app/modules/notification/service/notifications_local_service.dart';
 import 'package:thingsboard_app/thingsboard_client.dart';
+import 'package:thingsboard_app/utils/services/alarm_ringing_service.dart';
 import 'package:thingsboard_app/utils/services/tb_client_service/i_tb_client_service.dart';
 import 'package:thingsboard_app/utils/utils.dart';
 
@@ -208,9 +211,44 @@ class NotificationService {
     );
   }
 
+  /// Returns true if the incoming message carries a Thingsboard alarm payload.
+  /// Thingsboard sends `"tbAlarm":"true"` or a non-null `alarmId` field in
+  /// the FCM data map for alarm notifications.
+  static bool _isAlarmMessage(RemoteMessage message) {
+    final data = message.data;
+    return data['tbAlarm'] == 'true' ||
+        data['tbAlarm'] == true ||
+        data.containsKey('alarmId');
+  }
+
   Future<void> showNotification(RemoteMessage message) async {
     final notification = message.notification;
 
+    // ── Alarm notification: ring continuously ──────────────────────────
+    if (_isAlarmMessage(message)) {
+      final data = message.data;
+      final ringing = getIt<AlarmRingingService>();
+      await ringing.ring(
+        alarmTitle: notification?.title ?? data['alarmType'] ?? 'New Alarm',
+        alarmOriginator: data['originatorName'] ?? data['originator'] ?? '',
+        alarmSeverity: data['severity'] ?? '',
+        alarmStatus: data['status'] ?? '',
+      );
+
+      // Show the full-screen ringing screen over the current UI.
+      final ctx = globalNavigatorKey.currentContext;
+      if (ctx != null) {
+        await showDialog<void>(
+          context: ctx,
+          barrierDismissible: false,
+          barrierColor: Colors.black87,
+          builder: (_) => const AlarmRingingScreen(),
+        );
+      }
+      return; // Skip the regular notification for alarm messages.
+    }
+
+    // ── Regular notification ────────────────────────────────────────────
     if (notification != null) {
       flutterLocalNotificationsPlugin.show(
         notification.hashCode,

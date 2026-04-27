@@ -4,6 +4,7 @@ import 'package:thingsboard_app/config/routes/router.dart';
 import 'package:thingsboard_app/core/logger/tb_logger.dart';
 import 'package:thingsboard_app/core/usecases/user_details_usecase.dart';
 import 'package:thingsboard_app/thingsboard_client.dart' hide UserService;
+import 'package:thingsboard_app/utils/services/alarm_ringing_service.dart';
 import 'package:thingsboard_app/utils/services/communication/communication_service.dart';
 import 'package:thingsboard_app/utils/services/communication/i_communication_service.dart';
 import 'package:thingsboard_app/utils/services/device_info/device_info_service.dart';
@@ -58,6 +59,7 @@ Future<void> setUpRootDependencies() async {
       return client;
     })
     ..registerLazySingleton(() => NotificationService())
+    ..registerLazySingleton(() => AlarmRingingService())
     // ..registerSingleton(
     //   ThingsboardAppRouter(overlayService: getIt(), tbContext: getIt()),
     // )

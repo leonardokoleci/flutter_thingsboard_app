@@ -24,13 +24,7 @@ class FirebaseService implements IFirebaseService {
     logger.debug('FirebaseService::initializeApp(name: $name)');
 
     try {
-      if (await endpointService.isCustomEndpoint()) {
-        throw UnimplementedError(
-          'The current limitation is that Firebase can only be '
-          'used with the endpoint with which the app was initially initialized.',
-        );
-      }
-
+      // The endpoint is hardcoded – always allow Firebase to initialize.
       final app = await Firebase.initializeApp(options: options, name: name);
       _apps.add(name);
 
